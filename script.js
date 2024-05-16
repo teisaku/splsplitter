@@ -1,6 +1,18 @@
-let expenses = [];
-let members = new Set();
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+let members = new Set(JSON.parse(localStorage.getItem('members')) || []);
 let showingAll = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateMemberDropdown();
+    updateExpenseMembers();
+    displayExpenses();
+    calculateSplit();
+});
+
+function saveToLocalStorage() {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    localStorage.setItem('members', JSON.stringify(Array.from(members)));
+}
 
 function addMember() {
     const memberName = document.getElementById('memberName').value;
@@ -8,6 +20,7 @@ function addMember() {
         members.add(memberName);
         updateMemberDropdown();
         updateExpenseMembers();
+        saveToLocalStorage();
         document.getElementById('memberName').value = '';
     } else {
         alert('有効なメンバー名を入力してください。');
@@ -51,6 +64,7 @@ function addExpense() {
         expenses.push(expense);
         displayExpenses();
         calculateSplit();
+        saveToLocalStorage();
         clearForm();
     } else {
         alert('金額と支払者を正しく入力し、少なくとも一人のメンバーを選択してください。');
@@ -82,6 +96,7 @@ function removeExpense(index) {
     expenses.splice(index, 1);
     displayExpenses();
     calculateSplit();
+    saveToLocalStorage();
 }
 
 function toggleDetails() {
