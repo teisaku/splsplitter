@@ -1,6 +1,7 @@
 let members = [];
 let expenses = [];
 
+// メンバーを追加
 function addMember() {
     const memberName = document.getElementById('memberName').value;
     if (memberName !== "") {
@@ -11,6 +12,7 @@ function addMember() {
     }
 }
 
+// 支払者のオプションを更新
 function updatePayerOptions() {
     const payerSelect = document.getElementById('payerName');
     payerSelect.innerHTML = '<option value="" disabled selected>支払者を選択</option>';
@@ -22,6 +24,7 @@ function updatePayerOptions() {
     });
 }
 
+// 費用を追加
 function addExpense() {
     const expenseTitle = document.getElementById('expenseTitle').value;
     const expenseAmount = document.getElementById('expenseAmount').value;
@@ -42,6 +45,7 @@ function addExpense() {
     }
 }
 
+// 費用リストを更新
 function updateExpenseList() {
     const expensesList = document.getElementById('expenses');
     expensesList.innerHTML = "";
@@ -53,11 +57,12 @@ function updateExpenseList() {
     calculateResults();
 }
 
+// 結果を計算
 function calculateResults() {
     // 省略: 割り勘計算ロジック
 }
 
-// データをFirebaseに保存する関数
+// データをFirebaseに保存
 async function saveData() {
     try {
         await db.collection("split-bill-app").doc("sharedData").set({
@@ -70,14 +75,14 @@ async function saveData() {
     }
 }
 
-// データをFirebaseから読み込む関数
+// データをFirebaseから読み込み
 async function loadData() {
     try {
         const doc = await db.collection("split-bill-app").doc("sharedData").get();
         if (doc.exists) {
             const data = doc.data();
-            members = data.members;
-            expenses = data.expenses;
+            members = data.members || [];
+            expenses = data.expenses || [];
             updatePayerOptions();
             updateExpenseList();
             calculateResults();
