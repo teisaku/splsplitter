@@ -1,18 +1,35 @@
-let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-let members = new Set(JSON.parse(localStorage.getItem('members')) || []);
+let expenses = [];
+let members = new Set();
 let showingAll = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    updateMemberDropdown();
-    updateExpenseMembers();
-    displayExpenses();
-    calculateSplit();
-    displayBackups();
+    fetchData();
 });
 
-function saveToLocalStorage() {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-    localStorage.setItem('members', JSON.stringify(Array.from(members)));
+function fetchData() {
+    db.collection('appData').doc('data').get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            expenses = data.expenses || [];
+            members = new Set(data.members || []);
+            updateMemberDropdown();
+            updateExpenseMembers();
+            displayExpenses();
+            calculateSplit();
+            displayBackups();
+        }
+    }).catch((error) => {
+        console.error("Error fetching data: ", error);
+    });
+}
+
+function saveToFirebase() {
+    db.collection('appData').doc('data').set({
+        expenses: expenses,
+        members: Array.from(members)
+    }).catch((error) => {
+        console.error("Error saving data: ", error);
+    });
 }
 
 function addMember() {
@@ -21,7 +38,7 @@ function addMember() {
         members.add(memberName);
         updateMemberDropdown();
         updateExpenseMembers();
-        saveToLocalStorage();
+        saveToFirebase();
         document.getElementById('memberName').value = '';
     } else {
         alert('有効なメンバー名を入力してください。');
@@ -65,7 +82,7 @@ function addExpense() {
         expenses.push(expense);
         displayExpenses();
         calculateSplit();
-        saveToLocalStorage();
+        saveToFirebase();
         clearForm();
     } else {
         alert('金額と支払者を正しく入力し、少なくとも一人のメンバーを選択してください。');
@@ -97,7 +114,7 @@ function removeExpense(index) {
     expenses.splice(index, 1);
     displayExpenses();
     calculateSplit();
-    saveToLocalStorage();
+    saveToFirebase();
 }
 
 function toggleDetails() {
@@ -173,9 +190,14 @@ function clearForm() {
 
 function resetData() {
     if (confirm('本当にデータをリセットしますか？ この操作は元に戻せません。')) {
-        localStorage.removeItem('expenses');
-        localStorage.removeItem('members');
-        location.reload();
+        db.collection('appData').doc('data').delete().then(() => {
+            expenses = [];
+            members = new Set();
+            saveToFirebase();
+            location.reload();
+        }).catch((error) => {
+            console.error("Error removing document: ", error);
+        });
     }
 }
 
@@ -186,60 +208,58 @@ function createBackup() {
         return;
     }
 
-    let backups = JSON.parse(localStorage.getItem('backups')) || [];
-    if (backups.length >= 2) {
-        const overwrite = confirm('バックアップが2つあります。古いバックアップを上書きしますか？');
-        if (overwrite) {
-            backups.shift(); // 最古のバックアップを削除
-        } else {
-            return;
-        }
-    }
-
-    backups.push({ name: backupName, data: { expenses, members: Array.from(members) } });
-    localStorage.setItem('backups', JSON.stringify(backups));
-    displayBackups();
+    db.collection('backups').add({
+        name: backupName,
+        data: { expenses: expenses, members: Array.from(members) }
+    }).then(() => {
+        displayBackups();
+    }).catch((error) => {
+        console.error("Error creating backup: ", error);
+    });
 }
 
 function displayBackups() {
     const backupList = document.getElementById('backupList');
     backupList.innerHTML = '';
 
-    const backups = JSON.parse(localStorage.getItem('backups')) || [];
-
-    backups.forEach((backup, index) => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-            ${backup.name}
-            <div>
-                <button onclick="restoreBackup(${index})">復元</button>
-                <button class="delete-btn" onclick="deleteBackup(${index})">削除</button>
-            </div>
-        `;
-        backupList.appendChild(div);
+    db.collection('backups').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const backup = doc.data();
+            const div = document.createElement('div');
+            div.innerHTML = `
+                ${backup.name}
+                <div>
+                    <button onclick="restoreBackup('${doc.id}')">復元</button>
+                    <button class="delete-btn" onclick="deleteBackup('${doc.id}')">削除</button>
+                </div>
+            `;
+            backupList.appendChild(div);
+        });
+    }).catch((error) => {
+        console.error("Error getting backups: ", error);
     });
 }
 
-function restoreBackup(index) {
-    const backups = JSON.parse(localStorage.getItem('backups'));
-    if (backups && backups[index]) {
-        const backupData = backups[index].data;
-        expenses = backupData.expenses;
-        members = new Set(backupData.members);
-        saveToLocalStorage();
-        location.reload();
-    } else {
-        alert('選択されたバックアップが見つかりません。');
-    }
+function restoreBackup(id) {
+    db.collection('backups').doc(id).get().then((doc) => {
+        if (doc.exists) {
+            const backupData = doc.data().data;
+            expenses = backupData.expenses;
+            members = new Set(backupData.members);
+            saveToFirebase();
+            location.reload();
+        } else {
+            alert('選択されたバックアップが見つかりません。');
+        }
+    }).catch((error) => {
+        console.error("Error restoring backup: ", error);
+    });
 }
 
-function deleteBackup(index) {
-    let backups = JSON.parse(localStorage.getItem('backups'));
-    if (backups && backups[index]) {
-        backups.splice(index, 1);
-        localStorage.setItem('backups', JSON.stringify(backups));
+function deleteBackup(id) {
+    db.collection('backups').doc(id).delete().then(() => {
         displayBackups();
-    } else {
-        alert('選択されたバックアップが見つかりません。');
-    }
+    }).catch((error) => {
+        console.error("Error deleting backup: ", error);
+    });
 }
