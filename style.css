@@ -75,7 +75,7 @@ h1, h2 {
     background-color: #f2f2f2;
 }
 
-calculation div {
+.calculation div {
     background: #eee;
     padding: 10px;
     margin: 5px 0;
