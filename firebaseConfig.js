@@ -1,14 +1,21 @@
-// Replace with your Firebase project's configuration
-var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAh-s6UqPTU614UgT1H2_dJhpunT3buzfI",
+  authDomain: "simplesplitter1.firebaseapp.com",
+  projectId: "simplesplitter1",
+  storageBucket: "simplesplitter1.appspot.com",
+  messagingSenderId: "949275358143",
+  appId: "1:949275358143:web:00a13b212f2fe59dbd270a",
+  measurementId: "G-NEBY6CCDTQ"
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
