@@ -1,39 +1,94 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f7f7f7;
+let members = [];
+let expenses = [];
+
+function addMember() {
+    const memberName = document.getElementById('memberName').value;
+    if (memberName !== "") {
+        members.push(memberName);
+        updatePayerOptions();
+        document.getElementById('memberName').value = "";
+        saveData();  // データを保存
+    }
 }
-.container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+function updatePayerOptions() {
+    const payerSelect = document.getElementById('payerName');
+    payerSelect.innerHTML = '<option value="" disabled selected>支払者を選択</option>';
+    members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member;
+        option.textContent = member;
+        payerSelect.appendChild(option);
+    });
 }
-h1 {
-    margin-top: 0;
+
+function addExpense() {
+    const expenseTitle = document.getElementById('expenseTitle').value;
+    const expenseAmount = document.getElementById('expenseAmount').value;
+    const payerName = document.getElementById('payerName').value;
+
+    if (expenseAmount !== "" && payerName !== "") {
+        const expense = {
+            title: expenseTitle,
+            amount: parseFloat(expenseAmount),
+            payer: payerName,
+            members: [...members]
+        };
+        expenses.push(expense);
+        updateExpenseList();
+        document.getElementById('expenseTitle').value = "";
+        document.getElementById('expenseAmount').value = "";
+        saveData();  // データを保存
+    }
 }
-.form {
-    margin-bottom: 20px;
+
+function updateExpenseList() {
+    const expensesList = document.getElementById('expenses');
+    expensesList.innerHTML = "";
+    expenses.forEach(expense => {
+        const li = document.createElement('li');
+        li.textContent = `${expense.payer}が${expense.amount}円支払いました (${expense.title})`;
+        expensesList.appendChild(li);
+    });
+    calculateResults();
 }
-input, select, button {
-    margin: 5px 0;
-    padding: 10px;
-    width: 100%;
-    box-sizing: border-box;
+
+function calculateResults() {
+    // 省略: 割り勘計算ロジック
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
+
+// データをFirebaseに保存する関数
+async function saveData() {
+    try {
+        await db.collection("split-bill-app").doc("sharedData").set({
+            members: members,
+            expenses: expenses
+        });
+        console.log("データが保存されました");
+    } catch (e) {
+        console.error("Error adding document: ", e);
+    }
 }
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+
+// データをFirebaseから読み込む関数
+async function loadData() {
+    try {
+        const doc = await db.collection("split-bill-app").doc("sharedData").get();
+        if (doc.exists) {
+            const data = doc.data();
+            members = data.members;
+            expenses = data.expenses;
+            updatePayerOptions();
+            updateExpenseList();
+            calculateResults();
+            console.log("データが読み込まれました");
+        } else {
+            console.log("No such document!");
+        }
+    } catch (e) {
+        console.error("Error getting document: ", e);
+    }
 }
-th {
-    background-color: #f2f2f2;
-}
+
+// ページロード時にデータを読み込む
+window.onload = loadData;
