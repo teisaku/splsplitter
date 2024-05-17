@@ -3,8 +3,8 @@ let members = new Set();
 let showingAll = false;
 let gistId = '';  // GistのIDを保存するための変数
 
-// GitHubアクセストークン（GitHubから取得したアクセストークンを設定）
-const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN';
+// GitHubアクセストークン
+const GITHUB_TOKEN = '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';
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedGistId = localStorage.getItem('gistId');
@@ -79,7 +79,6 @@ function initializeApp() {
     updateExpenseMembers();
     displayExpenses();
     calculateSplit();
-    displayBackups();
 }
 
 function addMember() {
@@ -247,67 +246,4 @@ function resetData() {
         initializeApp();
         saveToGist();
     }
-}
-
-function createBackup() {
-    const backupName = document.getElementById('backupName').value;
-    if (!backupName) {
-        alert('バックアップ名を入力してください。');
-        return;
-    }
-
-    db.collection('backups').add({
-        name: backupName,
-        data: { expenses: expenses, members: Array.from(members) }
-    }).then(() => {
-        displayBackups();
-    }).catch((error) => {
-        console.error("Error creating backup: ", error);
-    });
-}
-
-function displayBackups() {
-    const backupList = document.getElementById('backupList');
-    backupList.innerHTML = '';
-
-    db.collection('backups').get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            const backup = doc.data();
-            const div = document.createElement('div');
-            div.innerHTML = `
-                ${backup.name}
-                <div>
-                    <button onclick="restoreBackup('${doc.id}')">復元</button>
-                    <button class="delete-btn" onclick="deleteBackup('${doc.id}')">削除</button>
-                </div>
-            `;
-            backupList.appendChild(div);
-        });
-    }).catch((error) => {
-        console.error("Error getting backups: ", error);
-    });
-}
-
-function restoreBackup(id) {
-    db.collection('backups').doc(id).get().then((doc) => {
-        if (doc.exists) {
-            const backupData = doc.data().data;
-            expenses = backupData.expenses;
-            members = new Set(backupData.members);
-            saveToGist();
-            location.reload();
-        } else {
-            alert('選択されたバックアップが見つかりません。');
-        }
-    }).catch((error) => {
-        console.error("Error restoring backup: ", error);
-    });
-}
-
-function deleteBackup(id) {
-    db.collection('backups').doc(id).delete().then(() => {
-        displayBackups();
-    }).catch((error) => {
-        console.error("Error deleting backup: ", error);
-    });
 }
