@@ -5,7 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘アプリ</title>
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="script.js"></script>
+    <!-- Firebase SDKの追加 -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+    <script>
+      // Firebase の設定
+      const firebaseConfig = {
+        apiKey: "AIzaSyAh-s6UqPTU614UgT1H2_dJhpunT3buzfI",
+        authDomain: "simplesplitter1.firebaseapp.com",
+        projectId: "simplesplitter1",
+        storageBucket: "simplesplitter1.appspot.com",
+        messagingSenderId: "949275358143",
+        appId: "1:949275358143:web:00a13b212f2fe59dbd270a",
+        measurementId: "G-NEBY6CCDTQ"
+      };
+
+      // Firebase の初期化
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
 </head>
 <body>
     <div class="container">
@@ -26,7 +44,6 @@
         <div class="expense-list">
             <h2>費用一覧</h2>
             <ul id="expenses"></ul>
-            <button id="showMoreButton" onclick="toggleDetails()" style="display: none;">詳細を表示</button>
         </div>
         <div class="calculation">
             <h2>割り勘結果</h2>
@@ -44,15 +61,10 @@
             <div id="detailedResults"></div>
         </div>
         <div class="backup">
-            <input type="text" id="backupName" placeholder="バックアップの名前">
-            <button onclick="createBackup()">バックアップを作成</button>
-            <button onclick="exportBackup()">バックアップをエクスポート</button>
-            <input type="file" id="importBackupInput" style="display:none;" onchange="importBackup(event)">
-            <button onclick="document.getElementById('importBackupInput').click();">バックアップをインポート</button>
-            <button onclick="shareBackup()">バックアップを共有</button>
+            <button onclick="saveData()">データを保存</button>
+            <button onclick="loadData()">データを読み込み</button>
         </div>
-        <div id="backupList"></div>
-        <button onclick="resetData()">データをリセット</button>
     </div>
+    <script src="script.js"></script>
 </body>
 </html>
