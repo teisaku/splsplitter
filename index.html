@@ -1,20 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>CodePen - A Pen by Teisaku</title>
-  <link rel="stylesheet" href="./style.css">
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘アプリ</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDKの追加 -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="firebaseConfig.js"></script>
 </head>
 <body>
     <div class="container">
@@ -60,10 +54,5 @@
         <button onclick="resetData()">データをリセット</button>
     </div>
     <script src="script.js"></script>
-</body>
-</html>
-<!-- partial -->
-  <script  src="./script.js"></script>
-
 </body>
 </html>
