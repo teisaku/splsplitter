@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘アプリ</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="script.js"></script>
 </head>
 <body>
     <div class="container">
@@ -45,10 +46,13 @@
         <div class="backup">
             <input type="text" id="backupName" placeholder="バックアップの名前">
             <button onclick="createBackup()">バックアップを作成</button>
+            <button onclick="exportBackup()">バックアップをエクスポート</button>
+            <input type="file" id="importBackupInput" style="display:none;" onchange="importBackup(event)">
+            <button onclick="document.getElementById('importBackupInput').click();">バックアップをインポート</button>
+            <button onclick="shareBackup()">バックアップを共有</button>
         </div>
         <div id="backupList"></div>
         <button onclick="resetData()">データをリセット</button>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
